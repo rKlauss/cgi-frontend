@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import PriceSlider from "./PriceSlider";
 
 interface Flight {
   id: number;
@@ -15,6 +16,8 @@ const FlightSearch: React.FC = () => {
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
   const [flights, setFlights] = useState<Flight[]>([]);
+  const [maxPrice, setMaxPrice] = useState(350);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -25,25 +28,42 @@ const FlightSearch: React.FC = () => {
       if (origin) params.origin = origin;
       if (destination) params.destination = destination;
       if (date) params.date = date;
+
       const response = await axios.get("http://localhost:8080/flights/search", {
         params,
       });
-      setFlights(response.data);
+
+      const allFlights: Flight[] = response.data;
+
+      if (date && allFlights.length === 0) {
+        setErrorMessage("No flights this day!");
+        setFlights([]);
+        return;
+      }
+
+      const filteredFlights = allFlights.filter(
+        (flight) => flight.price <= maxPrice
+      );
+
+      setFlights(filteredFlights);
+
+      if (filteredFlights.length === 0) {
+        setErrorMessage("Max Price too low - No flights found!");
+      } else {
+        setErrorMessage(""); 
+      }
     } catch (err) {
       console.log(err, "Error finding flights.");
     }
   };
 
-  const handleFlightSelect = (flight: Flight) => {
-    navigate(`/seat-selection`, { state: { flight } });
-  };
-
-  // Kuupäeva ja kellaaeg
-  const formatDateTime = (dateTime: string) => {
-    const dateObj = new Date(dateTime);
-    const dateStr = dateObj.toISOString().split("T")[0];
-    const timeStr = dateObj.toTimeString().split(" ")[0].slice(0, 5);
-    return { dateStr, timeStr };
+  const clearFilters = () => {
+    setOrigin("");
+    setDestination("");
+    setDate("");
+    setMaxPrice(350);
+    setFlights([]);
+    setErrorMessage("");
   };
 
   return (
@@ -52,6 +72,7 @@ const FlightSearch: React.FC = () => {
         <h1 className="text-2xl font-semibold text-center mb-4">
           Book Flights
         </h1>
+
         <div className="flex space-x-2 mb-4">
           <input
             type="text"
@@ -74,12 +95,30 @@ const FlightSearch: React.FC = () => {
             className="border p-2 rounded w-full"
           />
         </div>
-        <button
-          onClick={searchFlights}
-          className="w-full bg-yellow-500 text-black font-bold py-2 rounded hover:bg-yellow-600"
-        >
-          Search Flights
-        </button>
+
+        <PriceSlider maxPrice={maxPrice} setMaxPrice={setMaxPrice} />
+
+        {errorMessage && (
+          <div className="text-red-500 text-center font-semibold mb-2">
+            {errorMessage}
+          </div>
+        )}
+
+        <div className="flex space-x-2">
+          <button
+            onClick={searchFlights}
+            className="w-full bg-yellow-500 text-black font-bold py-2 rounded hover:bg-yellow-600"
+          >
+            Search Flights
+          </button>
+
+          <button
+            onClick={clearFilters}
+            className="w-full bg-gray-300 text-black font-bold py-2 rounded hover:bg-gray-400"
+          >
+            Clear Filters
+          </button>
+        </div>
 
         {flights.length > 0 && (
           <div className="mt-4 bg-gray-200 p-2 rounded font-semibold flex justify-between text-sm">
@@ -92,12 +131,17 @@ const FlightSearch: React.FC = () => {
 
         <ul className="mt-2">
           {flights.map((flight) => {
-            const { dateStr, timeStr } = formatDateTime(flight.departureTime);
+            const dateObj = new Date(flight.departureTime);
+            const dateStr = dateObj.toISOString().split("T")[0];
+            const timeStr = dateObj.toTimeString().split(" ")[0].slice(0, 5);
+
             return (
               <li
                 key={flight.id}
                 className="border-b py-2 cursor-pointer hover:bg-gray-200 p-2 rounded flex justify-between text-sm"
-                onClick={() => handleFlightSelect(flight)}
+                onClick={() =>
+                  navigate(`/seat-selection`, { state: { flight } })
+                }
               >
                 <span className="w-2/5">
                   {flight.origin} - {flight.destination}

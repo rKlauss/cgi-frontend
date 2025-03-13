@@ -48,16 +48,38 @@ const SeatSelection: React.FC = () => {
       try {
         const response = await axios.get(
           `http://localhost:8080/flights/${flightId}/seats/recommend`,
-          { params: { ...filters, count: 3 } }
+          { params: { ...filters, count: 8 } }
         );
         setRecommendedSeats(response.data);
       } catch (error) {
         console.error("Error fetching recommended seats:", error);
       }
     };
-
     fetchRecommendedSeats();
   }, [filters, flightId]);
+
+  const bookSeats = async () => {
+    try {
+      await axios.post(
+        "http://localhost:8080/seats/book",
+        selectedSeats.map((seat) => seat.id)
+      );
+      alert("Seats successfully booked!");
+
+      setSeats((prevSeats) =>
+        prevSeats.map((seat) =>
+          selectedSeats.some((s) => s.id === seat.id)
+            ? { ...seat, occupied: true }
+            : seat
+        )
+      );
+
+      setSelectedSeats([]);
+    } catch (error) {
+      console.error("Error booking seats:", error);
+      alert("Failed to book seats.");
+    }
+  };
 
   const groupedSeats: { [key: string]: Seat[] } = {};
   seats.forEach((seat) => {
@@ -161,7 +183,7 @@ const SeatSelection: React.FC = () => {
                         className={`w-12 h-12 flex items-center justify-center border rounded text-sm font-semibold cursor-pointer
                           ${
                             seat.occupied
-                              ? "bg-red-500 text-white"
+                              ? "bg-red-600 text-white"
                               : isSelected
                               ? "bg-blue-500 text-white"
                               : isRecommended
@@ -199,13 +221,15 @@ const SeatSelection: React.FC = () => {
           )}
           <hr className="my-2" />
           <p className="text-lg font-bold">Total: {totalPrice} €</p>
-          <button className="mt-4 w-full bg-yellow-500 text-black font-bold py-2 rounded hover:bg-yellow-600">
+          <button
+            onClick={bookSeats}
+            className="mt-4 w-full bg-yellow-500 text-black font-bold py-2 rounded hover:bg-yellow-600"
+          >
             Book Now
           </button>
         </div>
       </div>
 
-      {/* Legend */}
       <div className="mt-6 flex space-x-4">
         <div className="flex items-center">
           <div className="w-6 h-6 bg-yellow-500 border rounded mr-2"></div>
@@ -224,7 +248,7 @@ const SeatSelection: React.FC = () => {
           <span>Selected</span>
         </div>
         <div className="flex items-center">
-          <div className="w-6 h-6 bg-red-500 border rounded mr-2"></div>
+          <div className="w-6 h-6 bg-red-600 border rounded mr-2"></div>
           <span>Occupied</span>
         </div>
       </div>

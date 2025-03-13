@@ -20,11 +20,14 @@ const FlightSearch: React.FC = () => {
 
   const searchFlights = async () => {
     try {
-      const params: { origin?: string; destination?: string; date?: string } = {};
+      const params: { origin?: string; destination?: string; date?: string } =
+        {};
       if (origin) params.origin = origin;
       if (destination) params.destination = destination;
       if (date) params.date = date;
-      const response = await axios.get("http://localhost:8080/flights/search", { params });
+      const response = await axios.get("http://localhost:8080/flights/search", {
+        params,
+      });
       setFlights(response.data);
     } catch (err) {
       console.log(err, "Error finding flights.");
@@ -35,10 +38,20 @@ const FlightSearch: React.FC = () => {
     navigate(`/seat-selection`, { state: { flight } });
   };
 
+  // Kuupäeva ja kellaaeg
+  const formatDateTime = (dateTime: string) => {
+    const dateObj = new Date(dateTime);
+    const dateStr = dateObj.toISOString().split("T")[0];
+    const timeStr = dateObj.toTimeString().split(" ")[0].slice(0, 5);
+    return { dateStr, timeStr };
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl">
-        <h1 className="text-2xl font-semibold text-center mb-4">Book Flights</h1>
+        <h1 className="text-2xl font-semibold text-center mb-4">
+          Book Flights
+        </h1>
         <div className="flex space-x-2 mb-4">
           <input
             type="text"
@@ -67,16 +80,36 @@ const FlightSearch: React.FC = () => {
         >
           Search Flights
         </button>
-        <ul className="mt-4">
-          {flights.map((flight) => (
-            <li 
-              key={flight.id} 
-              className="border-b py-2 cursor-pointer hover:bg-gray-200 p-2 rounded"
-              onClick={() => handleFlightSelect(flight)}
-            >
-              {flight.origin} - {flight.destination} ({flight.departureTime}) - {flight.price} €
-            </li>
-          ))}
+
+        {flights.length > 0 && (
+          <div className="mt-4 bg-gray-200 p-2 rounded font-semibold flex justify-between text-sm">
+            <span className="w-2/5">Location</span>
+            <span className="w-1/5 text-center">Date</span>
+            <span className="w-1/5 text-center">Time</span>
+            <span className="w-1/5 text-right">Price</span>
+          </div>
+        )}
+
+        <ul className="mt-2">
+          {flights.map((flight) => {
+            const { dateStr, timeStr } = formatDateTime(flight.departureTime);
+            return (
+              <li
+                key={flight.id}
+                className="border-b py-2 cursor-pointer hover:bg-gray-200 p-2 rounded flex justify-between text-sm"
+                onClick={() => handleFlightSelect(flight)}
+              >
+                <span className="w-2/5">
+                  {flight.origin} - {flight.destination}
+                </span>
+                <span className="w-1/5 text-center">{dateStr}</span>
+                <span className="w-1/5 text-center">{timeStr}</span>
+                <span className="w-1/5 text-right font-bold">
+                  {flight.price} €
+                </span>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>

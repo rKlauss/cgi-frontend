@@ -8,15 +8,12 @@ interface PriceSliderProps {
 const PriceSlider: React.FC<PriceSliderProps> = ({ maxPrice, setMaxPrice }) => {
   return (
     <div className="mb-4 flex flex-col items-center w-full">
-      {/* Pealkiri keskel riba kohal */}
       <span className="font-semibold mb-1">Max Price: {maxPrice}€</span>
 
-      {/* Slider container (keskele joondatud) */}
       <div className="relative w-3/5 h-10 flex items-center">
         {/* Taustariba */}
         <div className="absolute left-0 right-0 h-2 bg-gray-300 rounded-full"></div>
 
-        {/* Kollane täidetud riba (keskele joondatud) */}
         <div
           className="absolute h-2 bg-yellow-500 rounded-full"
           style={{
@@ -25,7 +22,6 @@ const PriceSlider: React.FC<PriceSliderProps> = ({ maxPrice, setMaxPrice }) => {
           }}
         ></div>
 
-        {/* Slider input */}
         <input
           type="range"
           min="0"
@@ -39,7 +35,6 @@ const PriceSlider: React.FC<PriceSliderProps> = ({ maxPrice, setMaxPrice }) => {
         />
       </div>
 
-      {/* Min ja Max hinnad riba otstes */}
       <div className="w-3/5 flex justify-between text-sm mt-1">
         <span>0€</span>
         <span>350€</span>

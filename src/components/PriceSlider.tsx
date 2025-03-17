@@ -11,7 +11,7 @@ const PriceSlider: React.FC<PriceSliderProps> = ({ maxPrice, setMaxPrice }) => {
       <span className="font-semibold mb-1">Max Price: {maxPrice}€</span>
 
       <div className="relative w-3/5 h-10 flex items-center">
-        {/* Taustariba */}
+        {/* riba */}
         <div className="absolute left-0 right-0 h-2 bg-gray-300 rounded-full"></div>
 
         <div

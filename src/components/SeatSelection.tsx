@@ -59,6 +59,7 @@ const SeatSelection: React.FC = () => {
   }, [filters, flightId]);
 
   const bookSeats = async () => {
+    if (selectedSeats.length === 0) return;
     try {
       await axios.post(
         "http://localhost:8080/seats/book",

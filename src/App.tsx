@@ -1,12 +1,16 @@
-import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import FlightSearch from "./components/FlightSearch";
+import SeatSelection from "./components/SeatSelection";
 
-const App = () => {
+function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <FlightSearch />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<FlightSearch />} />
+        <Route path="/seat-selection" element={<SeatSelection />} />
+      </Routes>
+    </Router>
   );
-};
+}
 
 export default App;
